@@ -51,6 +51,13 @@ is the more defensible default and the desktop grid is the primary layout.
 
 ## Evidence
 
-`screenshots/desktop.png` (1100px) and `screenshots/mobile.png` (420px), both
-captured headless from `index.html`. The long heading in `index.html` is included
-to check wrapping at both sizes.
+Both captured headless from `index.html`: desktop at 1100px, mobile at 420px.
+The long heading in `index.html` is included to check wrapping at both sizes.
+
+Desktop (1100px) — three columns, `A` spans two:
+
+![Desktop layout](screenshots/desktop.png)
+
+Mobile (420px) — single column, ordered A → D → B → C → G:
+
+![Mobile layout](screenshots/mobile.png)
