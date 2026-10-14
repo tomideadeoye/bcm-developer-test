@@ -5,7 +5,7 @@ Submission for the **Big Cabal Media** Software Developer screening assessment
 
 - **Deadline:** 5pm, Friday 16 October 2026.
 - **Budget:** up to 4 hours excluding setup.
-- **Submission:** this private repository.
+- **Submission:** this repository, plus a ZIP copy of the same contents.
 - **AI disclosure:** see below.
 
 ## Structure
