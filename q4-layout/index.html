@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Q4 — Desktop and mobile layout (one HTML, one CSS, no JS)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <!--
+      DOM order is A → H (natural reading order). The visual order is changed
+      with CSS only (`grid-template-areas` on desktop; a re-ordered single
+      column on mobile). No section is duplicated — the same eight elements are
+      re-arranged. See README.md for the accessibility note.
+    -->
+    <h1 class="headline">
+      One HTML file and one stylesheet: a responsive grid that reflows from a
+      three-column desktop layout to a single column on mobile, without any
+      JavaScript and without duplicating a single section.
+    </h1>
+
+    <div class="grid">
+      <section class="tile tile--a" aria-label="Block A">A</section>
+      <section class="tile tile--b" aria-label="Block B">B</section>
+      <section class="tile tile--c" aria-label="Block C">C</section>
+      <section class="tile tile--d" aria-label="Block D">D</section>
+      <section class="tile tile--e" aria-label="Block E">E</section>
+      <section class="tile tile--f" aria-label="Block F">F</section>
+      <section class="tile tile--g" aria-label="Block G">G</section>
+      <section class="tile tile--h" aria-label="Block H">H</section>
+    </div>
+  </main>
+</body>
+</html>

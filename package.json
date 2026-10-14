@@ -1,0 +1,11 @@
+{
+  "name": "bcm-developer-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "happy-dom": "^15.11.7"
+  }
+}
