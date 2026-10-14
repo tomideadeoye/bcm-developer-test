@@ -123,13 +123,14 @@ before vs after.
 **Success looks like:** less time per publish, zero transcription errors, no new
 support tickets, measured over a week.
 
-**Similar improvement (≤100 words):** *(draft — confirm details)* At MerisLabs I
-replaced a hand-assembled client invoice/proposal step with a small generator
-that pulled the same source data into the exact output format downstream tools
-expected. The contribution was the format-nailing, not the tooling around it;
-the outcome was a few minutes saved per document and no more mismatched totals. I
-learned that the smallest reliable win is making the *output* exactly right for
-the next tool, rather than building a larger system nobody asked for.
+**Similar improvement (≤100 words):** At MerisLabs I built an engine that parsed a
+Tier-1 Nigerian bank's litigation portfolio into structured data and generated the
+audit report in code, replacing a manual drafting process. It surfaced liability
+patterns across the portfolio that the manual review had missed. The outcome was a
+faster, more accurate audit — and a repeatable method, not a one-off. I learned that
+the win came from making the output rigid and reproducible: encoding the exact
+structure the decision needed, rather than clever analysis. My contribution was the
+data model and the generation pipeline.
 
 ---
 
