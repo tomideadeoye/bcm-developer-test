@@ -1,9 +1,10 @@
 # Q1 — errors, effects, corrections
 
-**Environment assumption:** PHP 8, inside a WordPress theme template. No PHP
-runtime was available in the environment where this was prepared, so the errors
-were traced by hand against PHP 8 and `WP_Query` behaviour; the checks in
-`checks.md` are the ones I would run (and would run first given a PHP 8 shell).
+**Environment assumption:** PHP 8, inside a WordPress theme template. Verified
+with PHP 8.5: both files pass `php -l`, and the corrected logic passes **14/14**
+checks in `verify.php` (output in `checks-output.txt`). WordPress-specific parts
+(the `WP_Query` loop and template tags) are reasoned against core behaviour and
+sketched as `checks.php` for a full install.
 
 ## Errors and their effects
 

@@ -1,10 +1,9 @@
 # Q1 — checks I would run
 
-These are the four scenarios the brief asks for. They run against the corrected
-code inside a WordPress install (or with the WordPress test suite). No PHP
-runtime was available where this was prepared, so the **expected** result is
-documented rather than captured; I would run these first thing with a PHP 8
-shell and paste the output here.
+These are the four scenarios the brief asks for. They were **executed with PHP
+8.5** via `q1-php/verify.php` — a WordPress-free harness that mirrors
+`corrected.php` — together with `php -l` on both PHP files. Output is captured in
+`checks-output.txt` (**14/14 pass**).
 
 | Scenario | Input | Expected |
 |----------|-------|----------|
@@ -23,6 +22,7 @@ Additional checks:
 
 ## A minimal harness
 
-`checks.php` (below) sketches the assertions; it needs the WordPress test
-bootstrap (`WP_UnitTestCase`) to seed posts and run the query. It is included for
-completeness and is not executed in this environment.
+`verify.php` is the executable harness (no WordPress needed) and produced the
+results above. `checks.php` additionally sketches the same assertions against the
+real WordPress test framework (`WP_UnitTestCase`) for a full install; it is
+included for completeness.

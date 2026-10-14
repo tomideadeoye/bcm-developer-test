@@ -31,8 +31,9 @@ bunx html-validate q5-html/corrected.html
 open q6-js/app.html
 bun test q6-js
 
-# Q1 — no PHP runtime available locally; see q1-php/NOTES.md for the reasoning
-#      and the corrected code (PHP 8 / WordPress theme)
+# Q1 — run the checks (needs PHP 8+)
+php q1-php/verify.php
+php -l q1-php/corrected.php
 ```
 
 ## Evidence
@@ -42,7 +43,7 @@ Each part records how it was checked:
 - **Q4** — `q4-layout/screenshots/` (desktop + mobile, captured headless) incl. a long heading.
 - **Q5** — `q5-html/validation.txt` (validator output) with errors separated from improvements.
 - **Q6** — `q6-js/EVIDENCE.md` + `bun test` output (repeated clicks, toggling before/after adding paragraphs).
-- **Q1** — `q1-php/NOTES.md` (each error, its effect, the corrected code, and the checks I would run).
+- **Q1** — `q1-php/checks-output.txt` (`php -l` + 14/14 executable checks) and `q1-php/NOTES.md`.
 
 ## AI disclosure
 
@@ -52,8 +53,9 @@ verified locally by me before submission:
 
 - Q4/Q5 — rendered in a real browser and run through an HTML validator.
 - Q6 — covered by executable tests (`bun test`), including the edge cases the brief calls out.
-- Q1 — errors traced by hand against the PHP 8 / WordPress behaviour; no PHP runtime was
-  available in this environment, which is stated as an assumption in `q1-php/NOTES.md`.
+- Q1 — both files pass `php -l`; the corrected logic is covered by 14 executable
+  checks (`q1-php/verify.php`, output in `checks-output.txt`). WordPress-specific
+  behaviour is reasoned against core and sketched in `checks.php`.
 
 ## Assumptions
 
