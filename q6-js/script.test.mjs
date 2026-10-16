@@ -56,8 +56,15 @@ describe('Q6 — behaviour', () => {
     expect(seps().length).toBe(4); // [1,3,5,7]
   });
 
-  test('the second button is created by JS and toggles image paragraphs', () => {
-    const { doc, addButton } = mount();
+  test('copies land after the last paragraph, so the buttons stay below the content', () => {
+    const { container, addButton } = mount();
+    addButton.click();
+    const children = [...container.children];
+    expect(children.filter((el) => el.tagName === 'P').length).toBe(6);
+    expect(children.slice(-2).map((el) => el.tagName)).toEqual(['BUTTON', 'BUTTON']);
+  });
+
+  test('the second button is created by JS and toggles image paragraphs', () => {    const { doc, addButton } = mount();
     const buttons = doc.querySelectorAll('button');
     expect(buttons.length).toBe(2);
     const toggle = buttons[1];

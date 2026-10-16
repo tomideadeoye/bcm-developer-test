@@ -1,6 +1,8 @@
-$ php -l original.php && php -l corrected.php
-No syntax errors detected in original.php
-No syntax errors detected in corrected.php
+$ php -l original.php && php -l corrected.php && php -l verify.php && php -l checks.php
+No syntax errors detected in q1-php/original.php
+No syntax errors detected in q1-php/corrected.php
+No syntax errors detected in q1-php/verify.php
+No syntax errors detected in q1-php/checks.php
 
 $ php verify.php
 == 1. Missing parameters ==
@@ -15,7 +17,10 @@ PASS  starts at post 11 (no repeat of page 1)
 PASS  max_num_pages = 3
 
 == 2b. Page out of range ==
+PASS  the raw query returns no posts (the symptom to avoid)
 PASS  clamps to the last page
+PASS  renders the last page, not an empty state
+PASS  heading and body agree: page 3 of 3
 
 == 3. No search results ==
 PASS  returns 0 posts
@@ -29,4 +34,4 @@ PASS  surrounding content preserved
 == 4b. False positives (the '#[ad]#' bug) ==
 PASS  plain words untouched → no divs
 
-14 passed, 0 failed
+17 passed, 0 failed

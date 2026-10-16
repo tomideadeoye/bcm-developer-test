@@ -73,7 +73,12 @@ export function init(doc = document) {
   // Original button: add three shuffled copies after the last paragraph.
   addButton.addEventListener('click', () => {
     const clones = shuffle(originals.map((p) => p.cloneNode(true)));
-    clones.forEach((c) => container.append(c));
+    // Insert immediately after the last paragraph — not merely at the end of
+    // the container — so the copies really do follow the last paragraph and the
+    // buttons stay below the content they add.
+    const last = paragraphs().at(-1);
+    if (last) last.after(...clones);
+    else container.append(...clones);
     layout();
   });
 

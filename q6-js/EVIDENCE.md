@@ -4,8 +4,8 @@ Behaviour is implemented in `script.js` and covered by executable tests in
 `script.test.mjs` (run with `bun test`). DOM tests use `happy-dom`.
 
 ```
-$ bun test
-6 pass, 0 fail, 22 expect() calls
+$ bun test q6-js
+7 pass, 0 fail, 24 expect() calls
 ```
 
 ## What is checked
@@ -15,6 +15,7 @@ $ bun test
 | Separator pattern `P1, P2, HR, P3, P4, HR, P5` | `separatorIndices(n)` unit test: 3→`[1]`, 5→`[1,3]`, 9→`[1,3,5,7]`, and **no trailing HR** when nothing follows (2→`[]`) |
 | Applied **on initial load** | After `init`, 3 paragraphs → exactly one `hr.sep` |
 | **Repeated clicks** | Two clicks → 6 then 9 paragraphs, separators re-derived to 2 then 4 |
+| **Copies land after the last paragraph** | Two clicks in, the last two children of `<article>` are still the two buttons — so the copies are inserted *after the last paragraph*, not merely at the end of the container |
 | **Second button created by JS** | Only the original button exists in the HTML; after `init` there are 2 buttons |
 | **Toggling before/after adding paragraphs** | Toggle hides existing image paragraph(s); then clicking add produces new image paragraphs that are **also hidden** (state applied to every image paragraph, not just existing ones); toggling back shows all |
 | **Hidden paragraphs are still counted** | With images hidden, 6 paragraphs → still 2 separators |
@@ -31,6 +32,13 @@ $ bun test
   accessibility tree) but remain in the query used for counting separators, as
   the brief requires.
 - `shuffle` accepts an injectable RNG so it can be tested deterministically.
+- `app.html` is the **Q5 corrected markup, kept verbatim** — the same three
+  paragraphs, with `test.jpeg` copied into this folder so `q6-js/` works on its
+  own. The behaviour runs against the corrected HTML, not against a
+  re-typed approximation of it.
+- Copies are inserted with `lastParagraph.after(...clones)` rather than appended
+  to the container, so they really do follow the last paragraph and the two
+  buttons stay below the content they add.
 
 ## Manual check
 

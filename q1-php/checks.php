@@ -1,8 +1,11 @@
 <?php
 /**
- * Q1 — sketch of the checks, for a WordPress PHPUnit (WP_UnitTestCase) run.
- * Not executed in the preparation environment (no PHP runtime); documents the
- * assertions listed in checks.md.
+ * Q1 — the same checks against a real WordPress install (WP_UnitTestCase).
+ *
+ * Not executed in the preparation environment: PHP 8.5 is available (verify.php
+ * was run with it), but there is no WordPress + PHPUnit install, so this file
+ * documents the assertions that need core. Everything that can run without
+ * WordPress lives in verify.php.
  *
  * @group bcm-q1
  */
@@ -42,6 +45,16 @@ class BCM_Q1_Checks extends WP_UnitTestCase {
         $this->assertFalse($q->have_posts());
     }
 
+    public function test_out_of_range_page_is_clamped_and_requeried(): void {
+        // A custom query does not 404 an out-of-range page: it returns nothing.
+        $q = new WP_Query(['posts_per_page' => 10, 'paged' => 999, 'post_type' => 'post']);
+        $this->assertFalse($q->have_posts());
+
+        // The fix in corrected.php: clamp, then re-run against the last page.
+        $q2 = new WP_Query(['posts_per_page' => 10, 'paged' => (int) $q->max_num_pages, 'post_type' => 'post']);
+        $this->assertTrue($q2->have_posts());
+    }
+
     public function test_multiple_ad_markers_are_all_replaced(): void {
         $out = $this->render_ads('A [ad] B [ad-2] C [ad] D');
         $this->assertSame(3, substr_count($out, 'class="ad '));
@@ -51,5 +64,10 @@ class BCM_Q1_Checks extends WP_UnitTestCase {
     public function test_plain_ad_words_are_not_touched(): void {
         $out = $this->render_ads('an ad and a add and dad');
         $this->assertStringNotContainsString('<div', $out);
+    }
+
+    public function test_xss_in_post_content_is_neutralised(): void {
+        $clean = wp_kses_post('<p>Hello <script>alert(1)</script></p>');
+        $this->assertStringNotContainsString('<script', $clean);
     }
 }

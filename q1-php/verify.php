@@ -52,15 +52,14 @@ function render_ads(string $content): string
     );
 }
 
-/** Fake WP_Query: pagination on `paged`, search on `s`. */
-function fake_query(array $posts, int $perPage, int $paged, string $s): array
+/** Mirrors WP_Query: an out-of-range `paged` is NOT a 404 — it returns no posts. */
+function raw_query(array $posts, int $perPage, int $paged, string $s): array
 {
     $filtered = $s === ''
         ? $posts
         : array_values(array_filter($posts, static fn (string $p): bool => stripos($p, $s) !== false));
 
     $totalPages = max(1, (int) ceil(count($filtered) / $perPage));
-    $paged = min($paged, $totalPages);
 
     return [
         'posts'         => array_slice($filtered, ($paged - 1) * $perPage, $perPage),
@@ -69,31 +68,47 @@ function fake_query(array $posts, int $perPage, int $paged, string $s): array
     ];
 }
 
+/** Mirrors corrected.php: clamp an out-of-range page, then re-run the query. */
+function query(array $posts, int $perPage, int $paged, string $s): array
+{
+    $r = raw_query($posts, $perPage, $paged, $s);
+
+    if ($r['paged'] > $r['max_num_pages']) {
+        $r = raw_query($posts, $perPage, $r['max_num_pages'], $s);
+    }
+
+    return $r;
+}
+
 $POSTS = array_map(static fn (int $i): string => "Post {$i} about widgets", range(1, 25));
 
 echo "== 1. Missing parameters ==\n";
 $get = [];
 check('page defaults to 1', read_page($get), 1);
 check('search defaults to ""', read_search($get), '');
-$r = fake_query($POSTS, 10, read_page($get), read_search($get));
+$r = query($POSTS, 10, read_page($get), read_search($get));
 check('returns 10 posts', count($r['posts']), 10);
 check('starts at post 1', $r['posts'][0], 'Post 1 about widgets');
 
 echo "\n== 2. Page 2 ==\n";
 $get = ['page' => '2'];
-$r = fake_query($POSTS, 10, read_page($get), read_search($get));
+$r = query($POSTS, 10, read_page($get), read_search($get));
 check('returns 10 posts', count($r['posts']), 10);
 check('starts at post 11 (no repeat of page 1)', $r['posts'][0], 'Post 11 about widgets');
 check('max_num_pages = 3', $r['max_num_pages'], 3);
 
 echo "\n== 2b. Page out of range ==\n";
 $get = ['page' => '999'];
-$r = fake_query($POSTS, 10, read_page($get), read_search($get));
+$raw = raw_query($POSTS, 10, read_page($get), read_search($get));
+$r   = query($POSTS, 10, read_page($get), read_search($get));
+check('the raw query returns no posts (the symptom to avoid)', count($raw['posts']), 0);
 check('clamps to the last page', $r['paged'], 3);
+check('renders the last page, not an empty state', count($r['posts']), 5);
+check('heading and body agree: page 3 of 3', $r['paged'] === $r['max_num_pages'], true);
 
 echo "\n== 3. No search results ==\n";
 $get = ['s' => 'zzzznomatch'];
-$r = fake_query($POSTS, 10, read_page($get), read_search($get));
+$r = query($POSTS, 10, read_page($get), read_search($get));
 check('returns 0 posts', count($r['posts']), 0);
 
 echo "\n== 4. Multiple [ad] markers ==\n";

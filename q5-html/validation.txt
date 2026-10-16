@@ -1,2 +1,52 @@
-$ bunx html-validate corrected.html
-# exit 0 — no errors, no warnings
+# Q5 — validation evidence
+#
+# Two independent checkers, run against BOTH files: the markup as given, and the
+# corrected markup. The "before" run is included so the list of validity errors
+# is evidence, not assertion.
+#
+# `original-as-given.html` is the markup reproduced verbatim from the brief.
+
+$ bunx html-validate q5-html/original-as-given.html
+q5-html/original-as-given.html
+   1:2   error  <html> is missing required "lang" attribute             element-required-attributes
+   1:2   error  <html> element must have <body> as content              element-required-content
+   2:2   error  Element <body> is implicitly closed by document ending  no-implicit-close
+  15:2   error  Element <p> is implicitly closed by document ending     no-implicit-close
+  16:25  error  Attribute "href" using unquoted value                   attr-quotes
+  19:10  error  <img> is missing required "alt" attribute               wcag/h37
+  19:14  error  Attribute "src" using unquoted value                    attr-quotes
+  19:28  error  Attribute "with" using unquoted value                   attr-quotes
+  19:37  error  Attribute "height" using unquoted value                 attr-quotes
+  19:44  error  Attribute "height" has invalid value "auto"             attribute-allowed-values
+  20:40  error  Unclosed element '<b>'                                  close-order
+  22:17  error  End tag '</code>' seen but there were open elements     close-order
+  22:28  error  End tag '</p>' seen but there were open elements        close-order
+  23:2   error  <button> is missing recommended "type" attribute        no-implicit-button-type
+  24:2   error  End tag '</body>' seen but there were open elements     close-order
+
+✖ 15 problems (15 errors, 0 warnings)
+exit=1
+
+$ bunx html-validate q5-html/corrected.html
+(no output)
+exit=0
+
+$ curl -s -H "Content-Type: text/html; charset=utf-8" \
+    --data-binary @q5-html/original-as-given.html "https://validator.w3.org/nu/?out=json"
+# raw response: q5-html/nu-original-as-given.json — 3 errors, then it gives up:
+  error  line 1: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+  error  line 2: Stray start tag “body”.
+  error  line 2: Cannot recover after last error. Any further errors will be ignored.
+exit=0
+
+$ curl -s -H "Content-Type: text/html; charset=utf-8" \
+    --data-binary @q5-html/corrected.html "https://validator.w3.org/nu/?out=json"
+{"version":"26.10.12","messages":[]}
+# raw response: q5-html/nu-corrected.json — conforming: 0 errors, 0 warnings.
+exit=0
+
+# Why two tools: the W3C Nu validator is the authority on HTML conformance, but
+# on this input it stops after the first unrecoverable structure error (3
+# errors). html-validate recovers and reports all 15, which is what makes the
+# full error list checkable. Agreement on the corrected file (0/0 from both) is
+# the result that matters.

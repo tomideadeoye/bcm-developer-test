@@ -87,10 +87,21 @@ immediately, then diagnose. **Verify recovery:** the URL returns the corrected
 content from multiple locations/devices after caches are cleared, and the error
 rate is back to baseline.
 
-**Editor update (two sentences):** *"We found the cause and it's fixed — readers
-briefly saw an older copy while caches refreshed, so some of you may need a hard
-refresh to see the correction. The article is now live and consistent for
-everyone; thank you for flagging it."*
+**Editor update (two sentences) — sent only once the cause is confirmed.** The
+cause is *not* known at the time of writing, so there are two versions, not one:
+
+- **If a stale cache is confirmed:** *"The cause was a stale cached copy, and
+  it's fixed — the cache is purged and the corrected article is live for
+  everyone. Some readers may need a hard refresh; thank you for flagging it."*
+- **If it is not yet confirmed (the honest default):** *"The corrected article is
+  live on the server, so the stale copies are coming from a cached layer we are
+  still pinning down; a fix or a rollback ships by [time], and I'll confirm when
+  every reader sees the update. The correction itself is safe and
+  nothing is lost — thank you for flagging it."*
+
+I would not send "we found the cause and it's fixed" before the third check
+confirms it: if it turns out to be a code problem rather than a cache, that
+sentence is false and the next update is the one that costs trust.
 
 **Assumption:** there is a CDN/page cache in front of the site; I have not yet
 confirmed which layer is stale, so the first check is to localise that.
@@ -143,6 +154,19 @@ request cannot create a second record.
 
 ```js
 // One small function + notes.
+
+// `fetch` has NO default timeout, so the timeout in this scenario does not
+// exist unless we create it: AbortSignal.timeout() does that, and the abort
+// lands in the same catch path as a dropped connection.
+const TIMEOUT_MS = 5000;
+
+// The idempotency key belongs to the SIGNUP, not to the request. It is
+// generated once, where the signup originates, and reused for every retry —
+// including a retry after a page reload — so replays are recognised.
+function newSignup(email) {
+  return { email, key: crypto.randomUUID() };
+}
+
 async function subscribe(email, idempotencyKey, attempt = 0) {
   if (!isValidEmail(email)) {
     return { status: 'invalid' };          // non-retryable; surface to the user
@@ -152,6 +176,7 @@ async function subscribe(email, idempotencyKey, attempt = 0) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
       body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
 
     if (res.status === 429) {                 // rate limited
@@ -162,9 +187,10 @@ async function subscribe(email, idempotencyKey, attempt = 0) {
       return { status: 'rejected', code: res.status };  // validation/authz — do not retry
     }
     return await res.json();                  // 2xx (or 200 with the original result on replay)
-  } catch (_timeout) {
-    // Timeout / network: the service MAY have accepted it. Retry with the SAME
-    // key so a duplicate cannot be created; reconcile via a status lookup if one exists.
+  } catch (_timeoutOrNetwork) {
+    // Timeout / aborted / network: the service MAY have accepted it. Retry with
+    // the SAME key so a duplicate cannot be created; reconcile via a status
+    // lookup if one exists.
     return retry(email, idempotencyKey, attempt);
   }
 }
@@ -181,6 +207,9 @@ function retry(email, key, attempt, waitMs) {
   accept?".
 - **Avoid logging:** the plaintext email/PII in general logs, request bodies, and
   any secret/API keys; log the key and a status, not the payload.
+- **Expire the key, don't keep it forever:** the idempotency record only has to
+  outlive the retry window (say 24–48 hours). Scope it to the signup attempt,
+  not to the email, so a later genuine resubscribe is not silently swallowed.
 - **Test a retry after acceptance:** mock the service to accept, then simulate a
   timeout on the response; assert exactly **one** record exists, and that
   replaying the same key returns the original result rather than creating a

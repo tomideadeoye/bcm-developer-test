@@ -26,9 +26,17 @@ if ($search !== '') {
 
 $q = new WP_Query($args);
 
-// 3. `page` can exceed the number of pages; clamp it and report the real total.
+// 3. `page` can exceed the number of pages. A *custom* WP_Query does not 404 the
+//    way the main query does — it simply returns no posts — which would print
+//    "No results found" underneath a heading that already names the last page.
+//    Clamp, then re-run the query against the last page so the two agree.
 $total_pages = max(1, (int) $q->max_num_pages);
-$page        = min($page, $total_pages);
+
+if ($page > $total_pages) {
+    $page          = $total_pages;
+    $args['paged'] = $page;
+    $q             = new WP_Query($args);
+}
 ?>
 <h1>
     Page <?= (int) $page ?> of <?= (int) $total_pages ?>

@@ -3,7 +3,7 @@
 These are the four scenarios the brief asks for. They were **executed with PHP
 8.5** via `q1-php/verify.php` — a WordPress-free harness that mirrors
 `corrected.php` — together with `php -l` on both PHP files. Output is captured in
-`checks-output.txt` (**14/14 pass**).
+`checks-output.txt` (**17/17 pass**).
 
 | Scenario | Input | Expected |
 |----------|-------|----------|
@@ -14,11 +14,19 @@ These are the four scenarios the brief asks for. They were **executed with PHP
 
 Additional checks:
 
-- **Page out of range** (`?page=999`) → clamps to the last page, heading does not
-  say "Page 999".
+- **Page out of range** (`?page=999`) → the harness runs the real order of
+  operations: the raw query returns no posts (that is the symptom), then the
+  clamp-and-re-run returns the last page, so the heading and the body agree
+  ("Page 3 of 3" with posts, not "No results found").
 - **Marker false-positive** → a post containing the word "ad" or "add" is
   **unchanged** (proves the `#\[ad\]#` escaping).
-- **XSS** → a post with `<script>` in the body is neutralised by `wp_kses_post`.
+
+Not executable here (needs a WordPress install, so **reasoned, not run**):
+
+- **XSS** → `wp_kses_post()` on the post body should neutralise a `<script>`.
+  `checks.php` asserts it under `WP_UnitTestCase`; it is deliberately *not* in
+  `verify.php`, because `wp_kses_post()` is WordPress core and the harness has
+  no WordPress.
 
 ## A minimal harness
 

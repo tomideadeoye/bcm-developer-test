@@ -1,7 +1,7 @@
 # Q1 — errors, effects, corrections
 
 **Environment assumption:** PHP 8, inside a WordPress theme template. Verified
-with PHP 8.5: both files pass `php -l`, and the corrected logic passes **14/14**
+with PHP 8.5: both files pass `php -l`, and the corrected logic passes **17/17**
 checks in `verify.php` (output in `checks-output.txt`). WordPress-specific parts
 (the `WP_Query` loop and template tags) are reasoned against core behaviour and
 sketched as `checks.php` for a full install.
@@ -71,7 +71,10 @@ sketched as `checks.php` for a full install.
 
 ## What I changed
 
-See `corrected.php`. In short: `paged`; guarded, sanitised input; computed and
-clamped `$total_pages`; a correct, returning callback with an escaped literal
-regex; `get_the_title()`; `apply_filters('the_content', …)` + `wp_kses_post()`;
-empty-state handling; pagination links; `wp_reset_postdata()`.
+See `corrected.php`. In short: `paged`; guarded, sanitised input; computed
+`$total_pages`; an out-of-range `page` clamped **and re-queried** (a custom
+`WP_Query` returns no posts rather than 404-ing, so clamping only the printed
+value would leave the heading saying "Page 3 of 3" above "No results found"); a
+correct, returning callback with an escaped literal regex; `get_the_title()`;
+`apply_filters('the_content', …)` + `wp_kses_post()`; empty-state handling;
+pagination links; `wp_reset_postdata()`.
